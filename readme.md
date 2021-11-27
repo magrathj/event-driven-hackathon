@@ -15,3 +15,6 @@ https://docs.databricks.com/spark/latest/structured-streaming/streaming-event-hu
 
 Mock data to eventhub and read back
 https://docs.microsoft.com/en-gb/azure/databricks/scenarios/databricks-stream-from-eventhubs
+
+Connect keyvault to Azure Databricks
+https://docs.microsoft.com/en-us/azure/databricks/security/secrets/secret-scopes
