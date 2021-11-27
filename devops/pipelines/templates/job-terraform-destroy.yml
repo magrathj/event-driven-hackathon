@@ -1,0 +1,24 @@
+# Template for destroying Terraform resources and Terraform workspace.
+
+parameters:
+- name: environment
+  displayName: Terraform workspace name to delete
+  type: string
+- name: terraformRootModulePath
+  displayName: Path where the main.tf file is
+  type: string
+
+
+jobs:
+- job: terraformDestroyJob
+  displayName: Terraform Destroy ${{ parameters.environment }}
+  steps:
+  - template: tasks-terraform-init.yml
+    parameters:
+      environment: ${{ parameters.environment }}
+      terraformRootModulePath: ${{ parameters.terraformRootModulePath }}
+
+  - template: tasks-terraform-destroy.yml
+    parameters:
+      environment: ${{ parameters.environment }}
+      terraformRootModulePath: ${{ parameters.terraformRootModulePath }}

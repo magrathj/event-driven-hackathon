@@ -1,0 +1,31 @@
+# Steps needed in a job for applying a Terraform plan.
+
+parameters:
+- name: terraformRootModulePath
+  displayName: Path where the main.tf file is
+  type: string
+- name: terraformPlanPath
+  displayName: Path of the plan to apply
+  type: string
+  default: tfplan
+
+
+steps:
+- task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV2@2
+  name: terraformApply
+  displayName: Apply Terraform Plan
+  inputs:
+    provider: azurerm
+    command: apply
+    workingDirectory: ${{ parameters.terraformRootModulePath }}
+    environmentServiceNameAzureRM: $(terraformDeployAzureRMServiceConnectionName)
+    commandOptions: -auto-approve -input=false ${{ parameters.terraformPlanPath }} -lock=false
+
+- powershell: |
+    $terraformOutput = Get-Content "$(terraformApply.jsonOutputVariablesPath)" | ConvertFrom-Json
+    # Create outputs variables for this step.
+    $terraformOutput | Get-Member -MemberType NoteProperty | % { $o = $terraformOutput.($_.Name); Write-Host "##vso[task.setvariable variable=$($_.Name);isOutput=true;issecret=$($o.sensitive)]$($o.value)" }
+    # Create output variables accesible from all the steps of the current job.
+    $terraformOutput | Get-Member -MemberType NoteProperty | % { $o = $terraformOutput.($_.Name); Write-Host "##vso[task.setvariable variable=$($_.Name);issecret=$($o.sensitive)]$($o.value)" }
+  displayName: Create Terraform output variables
+  name: terraformOutput

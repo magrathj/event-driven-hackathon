@@ -1,0 +1,14 @@
+# Steps needed in a job for using dbx and databricks CLI tools.
+
+steps:
+- task: UsePythonVersion@0
+  displayName: Use Python 3.7
+  inputs:
+    versionSpec: 3.7
+
+- script: |
+    python -m pip install --upgrade pip
+    python -m pip install -r requirements-devops.txt
+    python -m pip install -e .
+  workingDirectory: databricks/
+  displayName: Install dependencies

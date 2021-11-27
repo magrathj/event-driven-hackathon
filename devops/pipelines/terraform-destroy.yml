@@ -1,0 +1,23 @@
+name: Terraform-Destroy
+
+pool: Default
+
+trigger: none
+
+variables:
+- group: Terraform-Status
+
+parameters:
+- name: environment
+  displayName: Name of the environment to destroy
+  type: string
+
+
+stages:
+- stage: destroyStage
+  displayName: Destroy ${{ parameters.environment }}
+  jobs:
+  - template: templates/job-terraform-destroy.yml
+    parameters:
+      environment: ${{ parameters.environment }}
+      terraformRootModulePath: $(Build.SourcesDirectory)/devops/terraform

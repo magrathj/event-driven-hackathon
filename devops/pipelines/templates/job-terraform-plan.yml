@@ -1,0 +1,44 @@
+# Template for planning a Terraform deployment.
+#
+# The Terraform plan is saved in binary (Terraform native) and JSON formats as
+# pipeline artifacts.
+
+parameters:
+- name: environment
+  displayName: Terraform workspace name
+  type: string
+- name: terraformRootModulePath
+  displayName: Path where the main.tf file is
+  type: string
+- name: terraformPlanArtifactName
+  displayName: Terraform Plan artifact name
+  type: string
+  default: tfplan
+
+
+jobs:
+- job: terraformPlanJob
+  displayName: Terraform Plan ${{ parameters.environment }}
+  steps:
+  - template: tasks-terraform-init.yml
+    parameters:
+      environment: ${{ parameters.environment }}
+      terraformRootModulePath: ${{ parameters.terraformRootModulePath }}
+
+  - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV2@2
+    name: terraformPlan
+    displayName: Create Terraform Plan
+    inputs:
+      provider: azurerm
+      command: plan
+      workingDirectory: ${{ parameters.terraformRootModulePath }}
+      environmentServiceNameAzureRM: $(terraformDeployAzureRMServiceConnectionName)
+      commandOptions: -out=tfplan -input=false
+
+  - publish: ${{ parameters.terraformRootModulePath }}/tfplan
+    displayName: Publish Terraform Binary Plan
+    artifact: ${{ parameters.terraformPlanArtifactName }}
+
+  - publish: $(terraformPlan.jsonPlanFilePath)
+    displayName: Publish Terraform JSON Plan
+    artifact: ${{ parameters.terraformPlanArtifactName }}-json

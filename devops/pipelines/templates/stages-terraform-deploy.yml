@@ -1,0 +1,43 @@
+# Template for planning and applying a Terraform deployment using two stages.
+#
+# The first stage is for planning, the second one for applying the plan.
+# Having the deployment split into two different stages allows us to review
+# the plan before applying the changes (using approvers).
+
+parameters:
+- name: environment
+  displayName: Environment name used for the planing
+  type: string
+- name: terraformRootModulePath
+  displayName: Path where the main.tf file is
+  type: string
+  default: $(Build.SourcesDirectory)/devops/terraform
+- name: onlyPlan
+  displayName: Execute only the Terraform Plan creation, do not Apply it
+  type: boolean
+  default: true
+
+
+stages:
+- stage: plan${{ parameters.environment }}
+  displayName: ${{ parameters.environment }} Plan Deployment
+  variables:
+    - group: terraform-deploy-${{ parameters.environment }}
+  jobs:
+    - template: job-terraform-plan.yml
+      parameters:
+        environment: ${{ parameters.environment }}
+        terraformPlanArtifactName: tfplan-${{ parameters.environment }}
+        terraformRootModulePath: ${{ parameters.terraformRootModulePath }}
+
+- ${{ if eq(parameters.onlyPlan, false) }}:
+  - stage: apply${{ parameters.environment }}
+    displayName: ${{ parameters.environment }} Apply Deployment
+    variables:
+      - group: terraform-deploy-${{ parameters.environment }}
+    jobs:
+      - template: deployment-job-terraform-apply.yml
+        parameters:
+          environment: ${{ parameters.environment }}
+          terraformPlanArtifactName: tfplan-${{ parameters.environment }}
+          terraformRootModulePath: ${{ parameters.terraformRootModulePath }}

@@ -1,0 +1,149 @@
+# Deploy an ephemeral environment, run tests and destroy environment.
+
+name: 'PR $(System.PullRequest.PullRequestId)-$(Rev:rr)'
+
+trigger: none
+pr:
+  autoCancel: false
+  branches:
+    include:
+    - master
+
+variables:
+- group: Terraform-Status
+- group: Terraform-Deploy-PR
+- name: terraformRootModulePath
+  value: $(Build.SourcesDirectory)/devops/environments/pr
+- name: environment
+  value: pr$(Build.BuildId)
+- name: pythonVersion
+  value: 3.7 
+
+
+stages:
+- stage: PR
+  jobs:
+  - job: RunUnitTests
+    displayName: Run Unit Tests
+    condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
+    pool:
+      vmImage: "ubuntu-latest"
+
+    steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: "$(pythonVersion)"
+        displayName: "Use Python $(pythonVersion)"
+
+      - script: |
+          python -m pip install --upgrade pip pytest pytest-azurepipelines pytest-cov
+        displayName: "Install dependencies"
+
+      - script: |
+          rootDirectory=$PWD
+          x=( $(find databricks -name "setup.py") );
+          for file in "${x[@]}"; { cd ${file/setup.py}; pip install -r requirements-unit.txt; cd ${rootDirectory}; }
+        displayName: "Install python requirements"
+
+      - script: | 
+          python -m pytest --cov-report html --cov-report xml --junitxml=junit/test-results.xml --cov=databricks databricks/data_aggregation/tests/unit
+        displayName: "Run Python tests"
+
+      - powershell: |
+          echo $(environment)
+        displayName: 'Show Environment Name'
+
+      - task: PublishCodeCoverageResults@1
+        displayName: "Publish Cobertura Coverage Report"
+        inputs:
+          codeCoverageTool: Cobertura
+          summaryFileLocation: "$(System.DefaultWorkingDirectory)/databricks/coverage.xml"
+          reportDirectory: "$(System.DefaultWorkingDirectory)/databricks/htmlcov"
+
+  - job: deployJob
+    dependsOn: RunUnitTests
+    displayName: Deploy PR Environment
+    steps:
+    - template: templates/tasks-terraform-init.yml
+      parameters:
+        environment: $(environment)
+        terraformRootModulePath: $(terraformRootModulePath)
+
+    - task: qetza.replacetokens.replacetokens-task.replacetokens@3
+      displayName: 'Replace Tokens'
+      inputs:
+        rootDirectory: $(terraformRootModulePath)
+        targetFiles: '**/*.tfvars'
+        encoding: 'auto'
+        writeBOM: true
+        escapeType: 'none'
+        actionOnMissing: 'warn'
+        keepToken: false
+        tokenPrefix: '__'
+        tokenSuffix: '__'
+        useLegacyPattern: false
+        enableTelemetry: true
+
+    - template: templates/tasks-terraform-apply.yml
+      parameters:
+        terraformRootModulePath: $(terraformRootModulePath)
+        terraformPlanPath: ""  # Do not use precomputed plan, create one.
+
+    - template: templates/tasks-dbx-init.yml
+
+    - script: |
+        dbx deploy --environment pr
+      workingDirectory: databricks/
+      displayName: Deploy Databricks Files
+      env:
+        DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+
+  - job: testJob
+    dependsOn: deployJob
+    displayName: PR Tests
+    variables:
+      DATABRICKS_HOST: $[ dependencies.deployJob.outputs['terraformOutput.DATABRICKS_HOST'] ]
+      DATABRICKS_TOKEN: $[ dependencies.deployJob.outputs['terraformOutput.DATABRICKS_TOKEN'] ]
+    steps:
+    - template: templates/tasks-dbx-init.yml
+
+    - script: |
+        dbx launch --environment pr --job=integration_tests --trace
+      workingDirectory: databricks/
+      displayName: Run Integration Tests
+      env:
+        DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+
+    - script: databricks fs cp -r --overwrite dbfs:/databricks/driver/integration_tests_reports $(System.DefaultWorkingDirectory)/databricks_integration_tests_reports/
+      displayName: Download Databricks Tests Results
+      env:
+        DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+
+    - task: PublishCodeCoverageResults@1
+      displayName: Publish Databricks Cobertura Results
+      inputs:
+        codeCoverageTool: Cobertura
+        pathToSources: databricks/
+        summaryFileLocation: $(System.DefaultWorkingDirectory)/databricks_integration_tests_reports/coverage.xml
+
+    - task: PublishTestResults@2
+      displayName: Publish Databricks Integration Tests Results
+      inputs:
+        testResultsFiles: $(System.DefaultWorkingDirectory)/databricks_integration_tests_reports/pytest.xml
+        testRunTitle: Publish Databricks Integration Tests Results
+        mergeTestResults: true
+        failTaskOnFailedTests: true
+
+  - job: destroyJob
+    dependsOn: testJob
+    displayName: Destroy PR Environment
+    steps:
+      - template: templates/tasks-terraform-init.yml
+        parameters:
+          environment: $(environment)
+          terraformRootModulePath: $(terraformRootModulePath)
+
+      - template: templates/tasks-terraform-destroy.yml
+        parameters:
+          environment: $(environment)
+          terraformRootModulePath: $(terraformRootModulePath)

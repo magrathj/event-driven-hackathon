@@ -1,0 +1,35 @@
+# Steps needed in a job for installing and initializing Terraform.
+
+parameters:
+- name: environment
+  displayName: Terraform workspace name
+  type: string
+- name: terraformRootModulePath
+  displayName: Path where the main.tf file is
+  type: string
+
+
+steps:
+- checkout: self
+
+- task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
+  displayName: Install Terraform
+  inputs:
+    terraformVersion: 1.0.0
+
+- task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV2@2
+  displayName: Initialize Terraform
+  inputs:
+    provider: azurerm
+    command: init
+    workingDirectory: ${{ parameters.terraformRootModulePath }}
+    backendServiceArm: $(terraformStatusAzureRMServiceConnectionName)
+    backendAzureRmResourceGroupName: $(terraformResourceGroupName)
+    backendAzureRmStorageAccountName: $(terraformStorageAccountName)
+    backendAzureRmContainerName: $(terraformContainerName)
+    backendAzureRmKey: $(terraformStorageAccountFilePath)
+    commandOptions: -input=false 
+
+- script: terraform workspace select ${{ parameters.environment }} || terraform workspace new ${{ parameters.environment }}
+  workingDirectory: ${{ parameters.terraformRootModulePath }}
+  displayName: Select Terraform workspace

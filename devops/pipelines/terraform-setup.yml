@@ -1,0 +1,52 @@
+# Terraform needs an Storage Account to store the deployment status.
+# This pipeline will create a resource group with an storage account with a
+# single container.
+# If any of the elements already exist, the process will discover them and skip
+# that step.
+
+name: Terraform-Setup
+
+trigger: none
+
+variables:
+- group: Terraform-Status
+
+steps:
+- task: AzureCLI@2
+  displayName: Create Terraform Resource Group
+  inputs:
+    azureSubscription: $(terraformStatusAzureRMServiceConnectionName)
+    scriptType: bash
+    scriptLocation: inlineScript
+    inlineScript: |
+      az group create \
+        --location "$(terraformLocation)" \
+        --name "$(terraformResourceGroupName)" \
+        --tags "$(terraformResourceTags)"
+
+- task: AzureCLI@2
+  displayName: Create Terraform Storage Account
+  inputs:
+    azureSubscription: $(terraformStatusAzureRMServiceConnectionName)
+    scriptType: bash
+    scriptLocation: inlineScript
+    inlineScript: |
+      az storage account create \
+        --name "$(terraformStorageAccountName)" \
+        --resource-group "$(terraformResourceGroupName)" \
+        --location "$(terraformLocation)" \
+        --sku Standard_RAGRS \
+        --kind StorageV2 \
+        --tags "$(terraformResourceTags)"
+
+- task: AzureCLI@2
+  displayName: Create Terraform Container
+  inputs:
+    azureSubscription: $(terraformStatusAzureRMServiceConnectionName)
+    scriptType: bash
+    scriptLocation: inlineScript
+    inlineScript: |
+      az storage container create \
+        --name "$(terraformContainerName)" \
+        --account-name "$(terraformStorageAccountName)" \
+        --auth-mode login
