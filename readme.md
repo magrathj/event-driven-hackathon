@@ -61,7 +61,15 @@ cd into devops/environments/dev
 ![image](https://user-images.githubusercontent.com/26692441/143688624-d0a6a756-df6a-4ba7-a8be-a9f6fdfd7ec6.png)
 ![image](https://user-images.githubusercontent.com/26692441/143688635-8b722a56-d982-4c79-9851-e31a0939afdb.png)
 
+### Create the following secrets
+![image](https://user-images.githubusercontent.com/26692441/143689542-66a60cb3-2583-4452-8363-f5b499773bb6.png)
 
+### Mount the workspace 
+
+Run the following notebook to mount the workspace to your ADLS 
+```
+  /EventDrivenPromotions/bronzetosilverorchestration
+```
 
 References:
 
