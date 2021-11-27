@@ -68,7 +68,7 @@ cd into devops/environments/dev
 
 Run the following notebook to mount the workspace to your ADLS 
 ```
-  /EventDrivenPromotions/bronzetosilverorchestration
+  /EventDrivenPromotions/mountlake
 ```
 
 References:
