@@ -31,6 +31,13 @@ You will need the remote container extension from VS code: https://code.visualst
 
 ### Deploy Azure environment (run locally)
 
+## Create service principal 
+
+![image](https://user-images.githubusercontent.com/26692441/143719428-c87c19b6-85a3-4d9b-9889-2105fb90f9e1.png)
+
+![image](https://user-images.githubusercontent.com/26692441/143719517-9daa9710-50c7-4037-b83a-f34ac414b26d.png)
+
+
 cd into devops/environments/dev
 
 ```
@@ -74,6 +81,11 @@ Run the following notebook to mount the workspace to your ADLS
 ![image](https://user-images.githubusercontent.com/26692441/143689635-b3436407-e521-4602-b9f0-ba9f80cff5b4.png)
 
 
+### Create a logic app
+
+![image](https://user-images.githubusercontent.com/26692441/143720320-8802cc2f-251a-4e2d-8cdc-4d7c7b6e175c.png)
+
+
 References:
 
 Read/Write to eventhub 
@@ -87,3 +99,6 @@ https://docs.microsoft.com/en-us/azure/databricks/security/secrets/secret-scopes
 
 Run inside of dev container
 https://code.visualstudio.com/docs/remote/containers
+
+read in avro 
+https://caiomsouza.medium.com/processing-event-hubs-capture-files-avro-format-using-spark-azure-databricks-save-to-parquet-95259001d85f
