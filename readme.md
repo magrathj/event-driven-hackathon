@@ -71,6 +71,9 @@ Run the following notebook to mount the workspace to your ADLS
   /EventDrivenPromotions/mountlake
 ```
 
+![image](https://user-images.githubusercontent.com/26692441/143689635-b3436407-e521-4602-b9f0-ba9f80cff5b4.png)
+
+
 References:
 
 Read/Write to eventhub 
