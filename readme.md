@@ -45,13 +45,25 @@ cd into devops/environments/dev
   terraform plan
 ```
 
+### Create containers in your lake 
+![image](https://user-images.githubusercontent.com/26692441/143689302-2bf222f9-1571-4e37-9f4f-22277806f05b.png)
+
+
+### Create eventhubs
+![image](https://user-images.githubusercontent.com/26692441/143689332-41819d3f-65f5-4bf1-8b41-099b09b3c672.png)
+
+### Turn on capture events
+![image](https://user-images.githubusercontent.com/26692441/143689371-565e4965-b174-4b5c-836e-56e8441f0e6b.png)
+
+
+
 ### Set up connection between databricks secret scope and key vault
 ![image](https://user-images.githubusercontent.com/26692441/143688624-d0a6a756-df6a-4ba7-a8be-a9f6fdfd7ec6.png)
 ![image](https://user-images.githubusercontent.com/26692441/143688635-8b722a56-d982-4c79-9851-e31a0939afdb.png)
 
 
 
-Ref:
+References:
 
 Read/Write to eventhub 
 https://docs.databricks.com/spark/latest/structured-streaming/streaming-event-hubs.html
