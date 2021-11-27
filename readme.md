@@ -4,4 +4,9 @@
 
 
 Ref:
+
+Read/Write to eventhub 
 https://docs.databricks.com/spark/latest/structured-streaming/streaming-event-hubs.html
+
+Mock data to eventhub and read back
+https://docs.microsoft.com/en-gb/azure/databricks/scenarios/databricks-stream-from-eventhubs
