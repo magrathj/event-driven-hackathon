@@ -24,17 +24,21 @@ Mock gps data from multiple app users
 Consume those events and write back those to the WriteTo eventhub, when those GPS coordinates are the proximity of a given store which has a promotion running
 ![image](https://user-images.githubusercontent.com/26692441/143741607-57a181c3-13f2-4959-8021-5c430de5f698.png)
 
-Down stream apps can then listen to the promotion eventhub (WriteTo) and then forward push notifications. In this example, we could use logic apps to become a consumer of the eventhub
+Down stream apps can then listen to the promotion eventhub (WriteTo) and then forward push notifications. In this example, we could use logic apps to become a consumer of the eventhub **(for this PoC we left this out of scope but show how it could be done)**.
 ![image](https://user-images.githubusercontent.com/26692441/143750047-d3625f4b-db7a-4336-b20f-3e40989dac3d.png)
 
 
 ### Near Realtime Analytics capability
 
+Events are stored into ADLS from the eventhubs into bronze. Here they have the avro schema format. The first thing we need to do is extract the body and get the raw data from there. Then we enrich the data by joining it onto the store dataset and promotions, so that we can provide a more rich dataset to provide analysis on. We then write the data to Silver. 
 ![image](https://user-images.githubusercontent.com/26692441/143751382-2f7ef225-089d-4975-9823-91833e61eb6f.png)
 
 
+To provide an analytics layer we take the Silver data and aggregate it to useful information that our users would be interested in. We use spark streaming to ensure that we get near realtime tables that can provide our users with up to date information. 
 ![image](https://user-images.githubusercontent.com/26692441/143751179-d75aa3d1-09d1-4fb5-bd8a-86f9d18c5656.png)
 
+When the analysis layer (GOLD) is ready, analyts can use it to query the results
+![image](https://user-images.githubusercontent.com/26692441/143756781-1904d30c-8591-4540-a453-bfb757515f23.png)
 
 
 ### How to setup
