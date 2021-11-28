@@ -1,6 +1,13 @@
 
 # Event Driven Architecture with Databricks
 
+
+![image](https://user-images.githubusercontent.com/26692441/143760398-1b1fdcb1-72c5-459c-8c94-486a0ae17b41.png)
+
+![image](https://user-images.githubusercontent.com/26692441/143760668-2f92245e-1b57-467d-a852-1c3dd7070c13.png)
+
+
+
 ## Entire Architecture
 ![image](https://user-images.githubusercontent.com/26692441/143684953-b1ee22e8-290d-4724-905e-c270835dd825.png)
 
@@ -41,7 +48,19 @@ When the analysis layer (GOLD) is ready, analyts can use it to query the results
 ![image](https://user-images.githubusercontent.com/26692441/143756781-1904d30c-8591-4540-a453-bfb757515f23.png)
 
 
-### How to setup
+
+
+
+
+
+
+
+
+
+
+*********************************************************************************************************************************
+
+### How to setup the project
 
 clone repo
 ``` 
