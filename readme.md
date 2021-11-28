@@ -1,7 +1,15 @@
 
 # Event Driven Architecture with Databricks
 
+## Entire Architecture
 ![image](https://user-images.githubusercontent.com/26692441/143684953-b1ee22e8-290d-4724-905e-c270835dd825.png)
+
+## Event driven push notifications
+![image](https://user-images.githubusercontent.com/26692441/143734815-9bfe09c8-308e-4f3f-a522-b2ee4c7647c8.png)
+
+## Analytics capability
+![image](https://user-images.githubusercontent.com/26692441/143735051-5423caa6-b835-4ed0-8a5c-269a4050b7d3.png)
+
 
 ## Eventhub read/write with Databricks
 
